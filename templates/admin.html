@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AI Smart Checkout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="admin-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="brand-header">
+                <div class="shield-logo">
+                    <i class="ph-fill ph-shield-check"></i>
+                    <span>AI</span>
+                </div>
+                <h2>AI Smart<br>Checkout System</h2>
+                <p>Admin Panel</p>
+            </div>
+
+            {% if not logged_in %}
+            <!-- LOGIN FORM -->
+            <div class="login-section">
+                <h3>Admin Sign In</h3>
+                <p class="subtitle">Access your admin dashboard</p>
+
+                {% if error %}
+                <div class="error-msg">{{ error }}</div>
+                {% endif %}
+
+                <form action="/admin_login" method="POST">
+                    <div class="input-group">
+                        <i class="ph ph-user icon-left"></i>
+                        <input type="text" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="ph ph-lock icon-left"></i>
+                        <input type="password" name="password" placeholder="Password" required>
+                    </div>
+
+                    <div class="form-options">
+                        <label><input type="checkbox"> Remember Me</label>
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="sign-in-btn">Sign In</button>
+                    <p class="secure-text"><i class="ph ph-shield-check"></i> Secure Admin Access</p>
+                </form>
+            </div>
+
+            {% else %}
+            <!-- LOGGED IN MENU -->
+            <nav class="admin-menu">
+                <a href="/admin" class="menu-item active"><i class="ph ph-squares-four"></i> Dashboard</a>
+                <a href="#" class="menu-item"><i class="ph ph-chart-line-up"></i> Sales Overview</a>
+                <a href="#" class="menu-item"><i class="ph ph-users"></i> Customers</a>
+                <a href="#" class="menu-item"><i class="ph ph-shield-warning"></i> Fraud Detection</a>
+                <a href="#" class="menu-item"><i class="ph ph-file-text"></i> Reports</a>
+                <a href="/dashboard" class="menu-item"><i class="ph ph-desktop"></i> Go to Dashboard</a>
+
+                <div class="menu-divider"></div>
+
+                <a href="/admin_logout" class="menu-item"><i class="ph ph-sign-out"></i> Logout</a>
+            </nav>
+
+            <div class="admin-user-profile">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&amp;background=10b981&amp;color=fff" alt="Admin">
+                <div class="user-details">
+                    <h4>Admin User</h4>
+                    <p>Administrator <span class="online-dot"></span></p>
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- MAIN DASHBOARD AREA -->
+        <main class="admin-main">
+            <header class="top-header">
+                <div class="header-left">
+                    <i class="ph ph-list menu-icon"></i>
+                    <h1>Dashboard</h1>
+                </div>
+
+                {% if logged_in %}
+                <div class="header-right">
+                    <div class="date-badge"><i class="ph ph-calendar-blank"></i> <span id="currentDate">Date</span>
+                    </div>
+                    <div class="notification"><i class="ph ph-bell"></i><span class="badge">3</span></div>
+                    <div class="profile-header">
+                        <div class="ph-info">
+                            <h4>Admin User</h4>
+                            <span>Administrator</span>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&amp;background=10b981&amp;color=fff" alt="Admin">
+                    </div>
+                </div>
+                {% endif %}
+            </header>
+
+            {% if not logged_in %}
+            <!-- LOCKED STATE -->
+            <div class="locked-state">
+                <div class="lock-icon"><i class="ph ph-lock-key"></i></div>
+                <h2>Dashboard Locked</h2>
+                <p>Please sign in from the sidebar to view live analytics and store data.</p>
+            </div>
+
+            {% else %}
+            <!-- UNLOCKED DASHBOARD STATE -->
+            <div class="dashboard-content">
+
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div class="banner-text">
+                        <h2>Welcome , Admin! 👋</h2>
+                        <p>Here's what's happening with your store today.</p>
+                    </div>
+                    <div class="banner-chart"><i class="ph ph-chart-bar"></i></div>
+                </div>
+
+                <!-- 4 Stat Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-green"><i class="ph ph-shopping-cart"></i></div>
+                        <div class="stat-info">
+                            <p>Total Sales</p>
+                            <h3>₹ {{ "%.2f"|format(sales) }}</h3>
+                            <span class="trend up"><i class="ph ph-arrow-up"></i> 12.5% vs yesterday</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-blue"><i class="ph ph-users"></i></div>
+                        <div class="stat-info">
+                            <p>Total Customers</p>
+                            <h3>{{ customers }}</h3>
+                            <span class="trend up"><i class="ph ph-arrow-up"></i> 8.3% vs yesterday</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-purple"><i class="ph ph-receipt"></i></div>
+                        <div class="stat-info">
+                            <p>Total Transactions</p>
+                            <h3>{{ tx_count }}</h3>
+                            <span class="trend up"><i class="ph ph-arrow-up"></i> 10.2% vs yesterday</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-red"><i class="ph ph-shield-warning"></i></div>
+                        <div class="stat-info">
+                            <p>Fraud Detected</p>
+                            <h3>{{ fraud }}</h3>
+                            <span class="trend up text-red"><i class="ph ph-arrow-up"></i> 2 vs yesterday</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-row">
+                    <div class="chart-container flex-2">
+                        <div class="chart-header">
+                            <h3>Sales Overview</h3>
+                            <select class="chart-filter">
+                                <option>This Week</option>
+                            </select>
+                        </div>
+                        <div style="position: relative; height: 260px; width: 100%;">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container flex-1">
+                        <div class="chart-header">
+                            <h3>Fraud Overview</h3>
+                        </div>
+                        <div class="donut-wrapper" style="position: relative; height: 260px; width: 100%;">
+                            <canvas id="fraudChart"></canvas>
+                            <div class="donut-center">
+                                <span>Total Fraud</span>
+                                <strong>{{ fraud }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions Table -->
+                <div class="transactions-section">
+                    <div class="section-header">
+                        <h3>Recent Transactions</h3>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Date &amp; Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_txs %}
+                            <tr>
+                                <td>TXN{{ tx[0] }}</td>
+                                <td>₹{{ "%.2f"|format(tx[1]) }}</td>
+                                <td>{{ tx[2] }}</td>
+                                <td><span class="status-badge success"><i class="ph ph-check-circle"></i>
+                                        Completed</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No recent
+                                    transactions.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            {% endif %}
+
+        </main>
+    </div>
+
+    <script>
+        // Set Current Date
+        const dateSpan = document.getElementById('currentDate');
+        if (dateSpan) {
+            dateSpan.textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // Initialize Charts if logged in
+        {% if logged_in %}
+        document.addEventListener("DOMContentLoaded", function () {
+            // Sidebar active state toggler
+            const menuItems = document.querySelectorAll('.admin-menu .menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if(this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // Sales Chart (Line)
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+
+            // Gradient fill
+            let gradient = salesCtx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Sales (₹)',
+                        data: [2500, 3800, 5200, 4100, 6800, 8500, parseFloat("{{ sales }}")],
+                        borderColor: '#6366f1',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+
+            // Fraud Donut Chart
+            const fraudCtx = document.getElementById('fraudChart').getContext('2d');
+            new Chart(fraudCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Unmatched Face', 'Duplicate Receipt', 'Other'],
+                    datasets: [{
+                        data: [parseInt("{{ fraud }}"), 0, 0],
+                        backgroundColor: ['#f59e0b', '#ef4444', '#10b981'],
+                        borderWidth: 0,
+                        cutout: '75%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false } // We can use custom HTML legends if needed
+                    }
+                }
+            });
+        });
+        {% endif %}
+    </script>
+</body>
+
+</html>

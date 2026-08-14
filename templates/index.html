@@ -3,102 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Billing System</title>
+    <title>Create Account - AI Smart Checkout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Step 1: Registration Form Card -->
-        <div class="form-card" id="formCard">
-            <div class="logo-circle">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-            
-            <h1>Smart Billing System</h1>
-            <p class="subtitle">Step 1: User Registration</p>
-            
-            <form id="registration-form">
-                <div class="input-group">
-                    <i class="fa-regular fa-user icon-left"></i>
-                    <input type="text" id="fullName" placeholder="Full Name" required>
-                </div>
+    
+    <div class="auth-wrapper">
+        <div class="main-auth-container">
+            <!-- Top Section (Left Info + Right Form) -->
+            <div class="auth-body">
                 
-                <div class="input-group">
-                    <i class="fa-regular fa-envelope icon-left"></i>
-                    <input type="email" id="email" placeholder="Email ID" required>
+                <!-- LEFT PANEL -->
+                <div class="info-panel">
+                    <div class="brand-header">
+                        <i class="ph ph-shopping-cart brand-icon"></i>
+                        <h1><span style="font-weight: 500;">AI Smart</span><br><span class="brand-highlight">Checkout</span> System</h1>
+                        <p class="brand-tagline">Smart Shopping. Smart Billing.<br>Secure Checkout.</p>
+                    </div>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="f-icon"><i class="ph ph-shield-check"></i></div>
+                            <div class="f-text">
+                                <h3>Secure & Reliable</h3>
+                                <p>Advanced security to protect your data</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-icon"><i class="ph ph-cpu"></i></div>
+                            <div class="f-text">
+                                <h3>AI Powered</h3>
+                                <p>Smart recommendations and real-time analytics</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="f-icon"><i class="ph ph-lightning"></i></div>
+                            <div class="f-text">
+                                <h3>Fast & Easy</h3>
+                                <p>Quick scan, smooth billing experience</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3D Basket Image reused from dashboard -->
+                    <div class="basket-img-container">
+                        <img src="{{ url_for('static', filename='basket.png') }}" alt="Basket">
+                    </div>
                 </div>
 
-                <div class="input-group">
-                    <i class="fa-solid fa-lock icon-left"></i>
-                    <input type="password" id="password" placeholder="Create Password" required>
-                    <i class="fa-regular fa-eye icon-right toggle-password"></i>
+                <!-- RIGHT PANEL -->
+                <div class="auth-panel">
+                    
+                    <!-- STEP 1: Registration Form -->
+                    <div class="form-card" id="formCard">
+                        <div class="user-avatar-icon">
+                            <i class="ph ph-user"></i>
+                        </div>
+                        
+                        <h2 class="auth-title">Create Your Account</h2>
+                        <p class="auth-subtitle"><span class="step-text">Step 1:</span> User Registration</p>
+                        
+                        <form id="registration-form">
+                            <div class="input-group">
+                                <i class="ph ph-user icon-left"></i>
+                                <input type="text" id="fullName" placeholder="Full Name" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <i class="ph ph-envelope icon-left"></i>
+                                <input type="email" id="email" placeholder="Email ID" required>
+                            </div>
+
+                            <div class="input-group">
+                                <i class="ph ph-lock icon-left"></i>
+                                <input type="password" id="password" placeholder="Create Password" required>
+                                <i class="ph ph-eye icon-right toggle-password"></i>
+                            </div>
+
+                            <div class="input-group">
+                                <i class="ph ph-lock icon-left"></i>
+                                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                                <i class="ph ph-eye icon-right toggle-password"></i>
+                            </div>
+
+                            <button type="submit" class="submit-btn primary-btn mt-10">
+                                Next: Add Face <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
+                            </button>
+                        </form>
+
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+
+                        <button class="outline-btn" type="button" onclick="alert('Face registration is mandatory for AI Checkout!')">
+                            <i class="ph ph-corners-out"></i> Add Face Later
+                        </button>
+
+                        <p class="footer-text">Already have an account? <a href="#" onclick="alert('Login flow is handled via Face Scan directly on the camera!')">Login</a></p>
+                    </div>
+
+                    <!-- STEP 2: Camera Section (Hidden initially) -->
+                    <div class="form-card hidden" id="cameraCard">
+                        <div class="user-avatar-icon" style="color: var(--primary-blue); background: rgba(37, 99, 235, 0.1);">
+                            <i class="ph ph-camera"></i>
+                        </div>
+                        
+                        <h2 class="auth-title">Add Your Face</h2>
+                        <p class="auth-subtitle"><span class="step-text">Step 2:</span> Capture for Smart Login</p>
+                        
+                        <div class="camera-container" id="cameraContainer">
+                            <video id="webcam" autoplay playsinline></video>
+                            <div class="face-overlay"></div>
+                        </div>
+
+                        <div class="camera-container hidden" id="previewContainer" style="border: 2px solid var(--primary-blue);">
+                            <canvas id="snapshot" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"></canvas>
+                        </div>
+
+                        <p id="cameraStatus" class="status-text text-center mt-10" style="color: var(--text-secondary);">Initializing live camera...</p>
+
+                        <div id="fallbackUpload" class="hidden mt-10">
+                            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                            <button type="button" class="outline-btn full-width" id="uploadBtn">
+                                <i class="ph ph-upload-simple"></i> Upload Photo Instead
+                            </button>
+                        </div>
+
+                        <div class="button-row mt-15">
+                            <button type="button" class="primary-btn flex-1" id="captureBtn">
+                                <i class="ph ph-camera"></i> Capture
+                            </button>
+                            <button type="button" class="outline-btn flex-1 hidden" id="retakeBtn">
+                                <i class="ph ph-arrow-counter-clockwise"></i> Retake
+                            </button>
+                            <button type="button" class="primary-btn flex-1 hidden" id="saveRegisterBtn">
+                                Save & Register
+                            </button>
+                        </div>
+                        
+                        <p class="footer-text mt-15" id="backToForm" style="cursor: pointer; text-align: center;">
+                            <i class="ph ph-arrow-left"></i> Back to Registration
+                        </p>
+                    </div>
+
                 </div>
+            </div>
 
-                <div class="input-group">
-                    <i class="fa-solid fa-lock icon-left"></i>
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-                    <i class="fa-regular fa-eye icon-right toggle-password"></i>
+            <!-- BOTTOM BADGES BAR -->
+            <div class="bottom-badges-bar">
+                <div class="b-badge">
+                    <div class="b-icon"><i class="ph ph-shield-check"></i></div>
+                    <div class="b-text">
+                        <h4>100% Secure</h4>
+                        <p>Your data is protected with top security</p>
+                    </div>
                 </div>
-
-                <button type="submit" class="submit-btn">
-                    Next: Add Face <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
-                </button>
-            </form>
-
-            <p class="footer-text">Already have an account? <a href="#">Login</a></p>
-        </div>
-
-        <!-- Step 2: Camera Section -->
-        <div class="form-card hidden" id="cameraCard">
-            <h2>Step 2: Add Face</h2>
-            <p class="subtitle">Capture your face for smart login</p>
+                <div class="b-badge">
+                    <div class="b-icon"><i class="ph ph-cpu"></i></div>
+                    <div class="b-text">
+                        <h4>AI Technology</h4>
+                        <p>Smart billing and fraud detection system</p>
+                    </div>
+                </div>
+                <div class="b-badge">
+                    <div class="b-icon"><i class="ph ph-cloud-arrow-up"></i></div>
+                    <div class="b-text">
+                        <h4>Real-time Sync</h4>
+                        <p>Live updates and instant data synchronization</p>
+                    </div>
+                </div>
+                <div class="b-badge">
+                    <div class="b-icon"><i class="ph ph-storefront"></i></div>
+                    <div class="b-text">
+                        <h4>500+ Stores</h4>
+                        <p>Trusted by hundreds of retail stores</p>
+                    </div>
+                </div>
+            </div>
             
-            <div class="camera-container" id="cameraContainer">
-                <video id="webcam" autoplay playsinline></video>
-                <div class="face-overlay"></div>
-            </div>
-
-            <!-- Preview section (hidden initially) -->
-            <div class="camera-container hidden" id="previewContainer" style="border: 2px solid var(--primary-green);">
-                <canvas id="snapshot" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"></canvas>
-            </div>
-
-            <p id="cameraStatus" class="status-text" style="margin-bottom: 15px;">Initializing live camera...</p>
-
-            <div id="fallbackUpload" class="hidden" style="margin-bottom: 15px;">
-                <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-                <button type="button" class="submit-btn" id="uploadBtn" style="background-color: #6366f1;">
-                    <i class="fa-solid fa-upload"></i> Upload Photo Instead
-                </button>
-            </div>
-
-            <div style="display: flex; gap: 10px;">
-                <button type="button" class="submit-btn" id="captureBtn" style="background-color: #3b82f6;">
-                    <i class="fa-solid fa-camera"></i> Capture Face
-                </button>
-                <button type="button" class="submit-btn hidden" id="retakeBtn" style="background-color: #f59e0b;">
-                    <i class="fa-solid fa-rotate-right"></i> Retake
-                </button>
-                <button type="button" class="submit-btn hidden" id="saveRegisterBtn">
-                    Save & Register
-                </button>
-            </div>
-            
-            <p class="footer-text" style="margin-top: 15px; cursor: pointer;" id="backToForm">
-                <i class="fa-solid fa-arrow-left"></i> Back to Form
-            </p>
         </div>
     </div>
 
     <!-- Success Modal -->
     <div id="successModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="check-icon"><i class="fa-solid fa-check"></i></div>
-            <h2>Registration Successful!</h2>
-            <p id="successMessage">User details and face have been securely saved.</p>
-            <button id="closeModal" class="submit-btn" style="margin-top: 15px;">Proceed to Dashboard</button>
+        <div class="modal-content glass-card" style="text-align: center; padding: 40px; border-radius: 20px;">
+            <div class="check-icon" style="font-size: 50px; color: #10b981; margin-bottom: 20px;"><i class="ph-fill ph-check-circle"></i></div>
+            <h2 style="margin-bottom: 10px;">Registration Successful!</h2>
+            <p id="successMessage" style="color: var(--text-secondary); margin-bottom: 20px;">User details and face have been securely saved.</p>
+            <button id="closeModal" class="primary-btn" style="width: 100%;">Proceed to Dashboard</button>
         </div>
     </div>
     

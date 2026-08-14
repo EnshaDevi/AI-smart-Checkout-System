@@ -3,5 +3,4 @@ Werkzeug==3.0.1
 pyzbar==0.1.9
 opencv-python-headless
 Pillow
-deepface
-tf-keras
+pandas

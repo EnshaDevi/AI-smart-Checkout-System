@@ -3,94 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Smart Billing System</title>
-    <!-- Use Flask url_for for static files -->
+    <title>Login - AI Smart Checkout</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Form Card -->
-        <div class="form-card" id="loginCard">
-            <div class="logo-circle">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
+    
+    <div class="auth-wrapper">
+        <div class="main-auth-container">
             
-            <h1>Smart Billing System</h1>
-            <p class="subtitle">Login to Your Account</p>
-            
-            <form id="login-form">
-                <div class="input-group">
-                    <i class="fa-regular fa-envelope icon-left"></i>
-                    <input type="email" id="loginEmail" placeholder="Email ID" required>
-                </div>
-
-                <div class="input-group">
-                    <i class="fa-solid fa-lock icon-left"></i>
-                    <input type="password" id="loginPassword" placeholder="Password" required>
-                    <i class="fa-regular fa-eye icon-right toggle-password"></i>
-                </div>
-
-                <button type="submit" class="submit-btn" style="margin-top: 20px;">
-                    Login
-                </button>
+            <div class="auth-body">
                 
-                <!-- Optional: Face Login Button -->
-                <button type="button" class="submit-btn" id="faceLoginBtn" style="background-color: #3b82f6; margin-top: 10px;">
-                    <i class="fa-solid fa-camera"></i> Login with Face
-                </button>
-            </form>
+                <!-- LEFT PANEL: LOGIN FORM -->
+                <div class="login-panel">
+                    <div class="brand-header-small">
+                        <i class="ph ph-shopping-cart brand-icon"></i>
+                        <div>
+                            <h2>AI Smart <br><span class="brand-highlight">Checkout System</span></h2>
+                            <p>Smart Shopping. Seamless Checkout.</p>
+                        </div>
+                    </div>
 
-            <p class="footer-text">Don't have an account? <a href="{{ url_for('index') }}">Create Account</a></p>
-        </div>
+                    <div class="login-form-container">
+                        <div class="welcome-text">
+                            <h1>Welcome Back! <span class="wave">👋</span></h1>
+                            <p>Sign in to access your smart checkout dashboard.</p>
+                        </div>
+                        
+                        <div class="user-login-label">
+                            <i class="ph ph-user"></i> User Login
+                        </div>
+                        
+                        <form id="registration-form">
+                            <div class="input-group">
+                                <i class="ph ph-user icon-left"></i>
+                                <input type="text" id="fullName" placeholder="Username" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <i class="ph ph-envelope icon-left"></i>
+                                <input type="email" id="email" placeholder="Email Address" required>
+                            </div>
 
-        <!-- Camera Section for Face Login (Initially Hidden) -->
-        <div class="form-card hidden" id="cameraCard">
-            <h2>Face Verification</h2>
-            <p class="subtitle">Please look at the camera to login</p>
-            
-            <div class="camera-container" id="cameraContainer">
-                <video id="webcam" autoplay playsinline></video>
-                <div class="face-overlay"></div>
+                            <div class="input-group">
+                                <i class="ph ph-lock icon-left"></i>
+                                <input type="password" id="password" placeholder="Password" required>
+                                <i class="ph ph-eye-closed icon-right toggle-password"></i>
+                            </div>
+
+                            <div class="form-options">
+                                <label class="remember-me">
+                                    <input type="checkbox" checked>
+                                    <span>Remember me</span>
+                                </label>
+                                <a href="#" class="forgot-pwd">Forgot Password?</a>
+                            </div>
+
+                            <button type="button" id="nextToCameraBtn" class="primary-btn mt-10">
+                                <i class="ph ph-scan"></i> Proceed to Face Scan
+                            </button>
+                        </form>
+                        
+                        <div class="feature-badges-small mt-15">
+                            <div class="s-badge">
+                                <i class="ph ph-shield-check"></i>
+                                <span>Secure<br><small>Your data is safe</small></span>
+                            </div>
+                            <div class="s-badge">
+                                <i class="ph ph-cpu"></i>
+                                <span>AI Powered<br><small>Intelligent System</small></span>
+                            </div>
+                            <div class="s-badge">
+                                <i class="ph ph-lightning"></i>
+                                <span>Fast & Easy<br><small>Save your time</small></span>
+                            </div>
+                        </div>
+
+                        <p class="footer-text">Don't have an account? <a href="#">Sign Up</a></p>
+                    </div>
+                </div>
+
+                <!-- RIGHT PANEL: CAMERA CAPTURE -->
+                <div class="camera-panel">
+                    <a href="/dashboard" class="back-link"><i class="ph ph-arrow-left"></i> Back to Login</a>
+                    
+                    <div class="camera-header mt-15">
+                        <i class="ph ph-corners-out scan-icon"></i>
+                        <div>
+                            <h2>Add Face for <span class="brand-highlight">Faster Checkout</span></h2>
+                            <p>We use AI to recognize you and make your checkout experience seamless.</p>
+                        </div>
+                    </div>
+
+                    <div class="steps-indicator">
+                        <div class="step completed">
+                            <div class="step-circle"><i class="ph ph-check"></i></div>
+                            <span>Login</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step active">
+                            <div class="step-circle">2</div>
+                            <span>Add Face</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-circle">3</div>
+                            <span>Complete</span>
+                        </div>
+                    </div>
+
+                    <div class="camera-frame-wrapper">
+                        <div class="live-indicator"><div class="dot"></div> LIVE</div>
+                        
+                        <!-- Green scanner corners -->
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+                        
+                        <div class="face-guide"></div>
+
+                        <div class="camera-container" id="cameraContainer">
+                            <video id="webcam" autoplay playsinline></video>
+                        </div>
+
+                        <div class="camera-container hidden" id="previewContainer">
+                            <canvas id="snapshot"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="tips-box">
+                        <p class="tips-title">Tips for best capture:</p>
+                        <ul>
+                            <li><i class="ph ph-check-circle"></i> Look directly at the camera</li>
+                            <li><i class="ph ph-check-circle"></i> Ensure good lighting on your face</li>
+                            <li><i class="ph ph-check-circle"></i> Remove glasses or obstructions</li>
+                            <li><i class="ph ph-check-circle"></i> Keep your face within the frame</li>
+                        </ul>
+                    </div>
+
+                    <div class="action-area">
+                        <button type="button" class="capture-circle-btn" id="captureBtn">
+                            <i class="ph ph-camera"></i>
+                        </button>
+                        <p class="capture-text" id="captureStatusText">Capture Photo</p>
+                        
+                        <div class="after-capture-actions hidden" id="afterCaptureActions">
+                            <button type="button" class="outline-btn flex-1" id="retakeBtn">Retake</button>
+                            <button type="button" class="primary-btn flex-1" id="saveRegisterBtn">Login</button>
+                        </div>
+                    </div>
+
+                    <p class="encryption-notice"><i class="ph ph-lock-key"></i> Your face data is encrypted and secure.</p>
+                </div>
             </div>
-
-            <div class="camera-container hidden" id="previewContainer" style="border: 2px solid var(--primary-green);">
-                <canvas id="snapshot" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;"></canvas>
-            </div>
-
-            <p id="cameraStatus" class="status-text" style="margin-bottom: 15px;">Initializing live camera...</p>
-
-            <div style="display: flex; gap: 10px;">
-                <button type="button" class="submit-btn" id="captureBtn" style="background-color: #3b82f6;">
-                    <i class="fa-solid fa-camera"></i> Scan Face
-                </button>
-                <button type="button" class="submit-btn hidden" id="retakeBtn" style="background-color: #f59e0b;">
-                    <i class="fa-solid fa-rotate-right"></i> Retake
-                </button>
-                <button type="button" class="submit-btn hidden" id="verifyFaceBtn">
-                    Verify Identity
-                </button>
-            </div>
-            
-            <p class="footer-text" style="margin-top: 15px; cursor: pointer;" id="backToForm">
-                <i class="fa-solid fa-arrow-left"></i> Back to Login
-            </p>
         </div>
     </div>
 
     <!-- Success Modal -->
     <div id="successModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="check-icon"><i class="fa-solid fa-check"></i></div>
-            <h2>Login Successful!</h2>
-            <p id="successMessage">Welcome back to Smart Billing System.</p>
-            <button id="closeModal" class="submit-btn" style="margin-top: 15px;">Proceed to Dashboard</button>
+        <div class="modal-content glass-card text-center">
+            <div class="check-icon text-green"><i class="ph-fill ph-check-circle" style="font-size: 60px;"></i></div>
+            <h2 class="mt-10" style="margin-top: 20px;">Login Successful!</h2>
+            <p id="successMessage" class="mt-10 text-secondary" style="margin-top: 10px;">Your profile is ready for smart checkout.</p>
+            <button id="closeModal" class="primary-btn mt-15" style="width: 100%; margin-top: 20px;">Proceed</button>
         </div>
     </div>
     
-    <script src="{{ url_for('static', filename='login.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

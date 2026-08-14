@@ -62,10 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const tax = subTotal * 0.05; // 5% tax
         const grandTotal = subTotal + tax;
 
-        receiptTotalItems.textContent = totalItems;
-        receiptSubTotal.textContent = subTotal.toFixed(2);
-        receiptTax.textContent = tax.toFixed(2);
-        receiptGrandTotal.textContent = `₹${grandTotal.toFixed(2)}`;
+        if (receiptTotalItems) receiptTotalItems.textContent = totalItems;
+        if (receiptSubTotal) receiptSubTotal.textContent = subTotal.toFixed(2);
+        if (receiptTax) receiptTax.textContent = tax.toFixed(2);
+        if (receiptGrandTotal) receiptGrandTotal.textContent = `₹${grandTotal.toFixed(2)}`;
+        
+        const topGrandTotal = document.getElementById('topGrandTotal');
+        if (topGrandTotal) topGrandTotal.textContent = `₹${grandTotal.toFixed(2)}`;
 
         // Set DateTime
         const now = new Date();
@@ -92,6 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
             verifyVideo.style.display = 'none';
         }
     }
+
+    // Handle the payload
+    const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let currentSubTotal = 0;
+    
+    // Quick pass to calculate total for API
+    currentCart.forEach(item => { currentSubTotal += item.price * item.qty; });
+    const currentTax = currentSubTotal * 0.05;
+    const finalGrandTotal = currentSubTotal + currentTax;
 
     // Fallback Upload Logic
     const verifyUploadBtn = document.getElementById('verifyUploadBtn');
@@ -121,7 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const res = await fetch('/api/verify_face', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ image: base64Img })
+                            body: JSON.stringify({ 
+                                image: base64Img,
+                                cart: currentCart,
+                                totalAmount: finalGrandTotal
+                            })
                         });
                         const data = await res.json();
                         handleVerificationResult(data);
@@ -159,7 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/verify_face', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64Img })
+                body: JSON.stringify({ 
+                    image: base64Img,
+                    cart: currentCart,
+                    totalAmount: finalGrandTotal
+                })
             });
             const data = await res.json();
 
@@ -176,6 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Status Box
         statusBox.className = 'status-box';
         statusBox.classList.add(isSuccess ? 'success' : 'failed');
+
+        const actionBtns = document.getElementById('receiptActionButtons');
+        if (actionBtns) actionBtns.style.display = 'flex'; // Always show action buttons after scan
 
         if (isSuccess) {
             statusIcon.className = 'ph ph-check-circle status-icon';
@@ -205,6 +228,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('receiptPanel').style.display = 'block'; // Show Receipt ONLY on success
             successMeta.style.display = 'block';
             successFooter.style.display = 'flex';
+            
+            // Show UPI QR Code
+            const qrContainer = document.getElementById('qrCodeContainer');
+            const upiQRCode = document.getElementById('upiQRCode');
+            if (qrContainer && upiQRCode) {
+                upiQRCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=store@upi&pn=SmartCheckout&am=${finalGrandTotal.toFixed(2)}`;
+                qrContainer.style.display = 'block';
+            }
+            
+            // Voice Feedback
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("Payment Successful. Thank you for shopping!"));
+            }
 
         } else {
             statusIcon.className = 'ph ph-warning status-icon';
@@ -217,6 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fraudDataBox.style.display = 'block';
             failMeta.style.display = 'flex';
             failFooter.style.display = 'flex';
+
+            // Voice Feedback
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("Fraud Alert! Verification Failed."));
+            }
         }
     }
 

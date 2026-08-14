@@ -1,94 +1,67 @@
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
-    const formCard = document.getElementById('formCard');
-    const cameraCard = document.getElementById('cameraCard');
     const form = document.getElementById('registration-form');
+    const fullNameInput = document.getElementById('fullName');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const nextToCameraBtn = document.getElementById('nextToCameraBtn');
     
     // Camera & Canvas Elements
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('snapshot');
-    const cameraStatus = document.getElementById('cameraStatus');
     const cameraContainer = document.getElementById('cameraContainer');
     const previewContainer = document.getElementById('previewContainer');
+    const captureStatusText = document.getElementById('captureStatusText');
     
     // Buttons
     const captureBtn = document.getElementById('captureBtn');
+    const afterCaptureActions = document.getElementById('afterCaptureActions');
     const retakeBtn = document.getElementById('retakeBtn');
     const saveRegisterBtn = document.getElementById('saveRegisterBtn');
-    const backToFormBtn = document.getElementById('backToForm');
     
     // Modal Elements
     const modal = document.getElementById('successModal');
     const closeModal = document.getElementById('closeModal');
     const successMessage = document.getElementById('successMessage');
 
-    // Data Storage
-    let capturedFormData = {};
     let currentStream = null;
+    let isCameraActive = false;
+    let capturedFaceData = null;
 
     // Toggle Password Visibility
-    const passwordFields = document.querySelectorAll('input[type="password"]');
     const togglePasswordBtns = document.querySelectorAll('.toggle-password');
-    
-    togglePasswordBtns.forEach((btn, index) => {
+    togglePasswordBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
-            const field = passwordFields[index];
-            if (field.type === 'password') {
-                field.type = 'text';
-                btn.classList.remove('fa-eye');
-                btn.classList.add('fa-eye-slash');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                btn.classList.remove('ph-eye-closed');
+                btn.classList.add('ph-eye');
             } else {
-                field.type = 'password';
-                btn.classList.remove('fa-eye-slash');
-                btn.classList.add('fa-eye');
+                passwordInput.type = 'password';
+                btn.classList.remove('ph-eye');
+                btn.classList.add('ph-eye-closed');
             }
         });
     });
 
-    // STEP 1: Form Submit (Move to Step 2)
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const pwd = document.getElementById('password').value;
-        const confirmPwd = document.getElementById('confirmPassword').value;
-        
-        if (pwd !== confirmPwd) {
-            alert("Passwords do not match!");
-            return;
-        }
-
-        capturedFormData = {
-            fullName: document.getElementById('fullName').value,
-            email: document.getElementById('email').value,
-            password: pwd
-        };
-
-        // Switch UI to Camera Step
-        formCard.classList.add('hidden');
-        cameraCard.classList.remove('hidden');
-        resetCameraUI();
-        startCamera();
-    });
-
-    // STEP 2: Initialize Live Camera
+    // Start Live Camera
     async function startCamera() {
+        if (isCameraActive) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 400, height: 300, facingMode: "user" }
+                video: { width: 320, height: 320, facingMode: "user" }
             });
             currentStream = stream;
             video.srcObject = stream;
-            
-            video.onloadedmetadata = () => {
-                cameraStatus.textContent = 'Live Camera: Ready to capture your face.';
-                cameraStatus.style.color = 'var(--text-light)';
-            };
+            isCameraActive = true;
+            captureStatusText.textContent = "Ready to capture";
+            document.querySelector('.live-indicator').style.display = 'flex';
         } catch (err) {
             console.error("Camera error:", err);
-            cameraStatus.textContent = 'Camera blocked. You can upload a photo instead.';
-            cameraStatus.style.color = 'red';
+            captureStatusText.textContent = "Camera access blocked";
+            captureStatusText.style.color = "red";
             captureBtn.disabled = true;
-            document.getElementById('fallbackUpload').classList.remove('hidden');
+            document.querySelector('.live-indicator').style.display = 'none';
         }
     }
 
@@ -96,93 +69,94 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
             currentStream = null;
+            isCameraActive = false;
         }
+    }
+
+    // Initialize camera text
+    captureStatusText.textContent = "Click 'Proceed to Face Scan' on the left to start camera";
+    
+    // Proceed button validation (optional step)
+    if (nextToCameraBtn) {
+        nextToCameraBtn.addEventListener('click', () => {
+            if (!fullNameInput.value || !emailInput.value || !passwordInput.value) {
+                alert("Please fill in your details first.");
+                return;
+            }
+            // Start the camera only when details are filled and button is clicked
+            startCamera();
+            
+            // Add a visual cue to look at the camera
+            document.querySelector('.camera-panel').scrollIntoView({ behavior: 'smooth' });
+            captureStatusText.textContent = "Please look at the camera and capture";
+            captureStatusText.style.color = "var(--primary-teal)";
+        });
     }
 
     // Capture Face Button Click
     captureBtn.addEventListener('click', () => {
+        if (!isCameraActive) return;
+
         const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 320;
         
         // Draw video frame to canvas
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
+        capturedFaceData = canvas.toDataURL('image/jpeg');
+
         // Switch to preview mode
         cameraContainer.classList.add('hidden');
         previewContainer.classList.remove('hidden');
         
         captureBtn.classList.add('hidden');
-        retakeBtn.classList.remove('hidden');
-        saveRegisterBtn.classList.remove('hidden');
+        afterCaptureActions.classList.remove('hidden');
         
-        cameraStatus.textContent = 'Face captured! You can now Save & Register.';
-        cameraStatus.style.color = 'var(--primary-green)';
+        document.querySelector('.live-indicator').style.display = 'none';
+        captureStatusText.textContent = 'Face captured!';
+        captureStatusText.style.color = 'var(--primary-teal)';
     });
 
     // Retake Button Click
     retakeBtn.addEventListener('click', () => {
-        resetCameraUI();
-    });
-
-    // Reset Camera UI Helper
-    function resetCameraUI() {
+        capturedFaceData = null;
+        
         cameraContainer.classList.remove('hidden');
         previewContainer.classList.add('hidden');
         
         captureBtn.classList.remove('hidden');
-        captureBtn.disabled = false;
-        retakeBtn.classList.add('hidden');
-        saveRegisterBtn.classList.add('hidden');
+        afterCaptureActions.classList.add('hidden');
         
-        cameraStatus.textContent = 'Live Camera: Ready to capture your face.';
-        cameraStatus.style.color = 'var(--text-light)';
-    }
-
-    // Fallback Upload Handling
-    const uploadBtn = document.getElementById('uploadBtn');
-    const imageUpload = document.getElementById('imageUpload');
-    if (uploadBtn) {
-        uploadBtn.addEventListener('click', () => {
-            imageUpload.click();
-        });
-        
-        imageUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const context = canvas.getContext('2d');
-                        canvas.width = 400;
-                        canvas.height = 300;
-                        context.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        cameraContainer.classList.add('hidden');
-                        previewContainer.classList.remove('hidden');
-                        captureBtn.classList.add('hidden');
-                        retakeBtn.classList.remove('hidden');
-                        saveRegisterBtn.classList.remove('hidden');
-                        
-                        cameraStatus.textContent = 'Photo uploaded! You can now Save & Register.';
-                        cameraStatus.style.color = 'var(--primary-green)';
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+        document.querySelector('.live-indicator').style.display = 'flex';
+        captureStatusText.textContent = 'Capture Photo';
+        captureStatusText.style.color = 'var(--text-secondary)';
+    });
 
     // FINAL STEP: Save & Register Both Details
     saveRegisterBtn.addEventListener('click', async () => {
+        const pwd = passwordInput.value;
+        const name = fullNameInput.value;
+        const email = emailInput.value;
+
+        if (!name || !email || !pwd) {
+            alert("Please fill in your Username, Email, and Password on the left panel before completing login.");
+            return;
+        }
+        if (!capturedFaceData) {
+            alert("Please capture your face photo first.");
+            return;
+        }
+
         saveRegisterBtn.disabled = true;
-        saveRegisterBtn.innerHTML = 'Saving...';
+        saveRegisterBtn.innerHTML = 'Logging in...';
         
-        // Get image data from canvas
-        const imageData = canvas.toDataURL('image/jpeg');
-        capturedFormData.faceImage = imageData;
+        const capturedFormData = {
+            fullName: name,
+            email: email,
+            password: pwd,
+            faceImage: capturedFaceData
+        };
 
         try {
             // Send both form data and face image to Python backend
@@ -203,25 +177,18 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alert("Error: " + result.message);
                 saveRegisterBtn.disabled = false;
-                saveRegisterBtn.innerHTML = 'Save & Register';
+                saveRegisterBtn.innerHTML = 'Login & Complete';
             }
         } catch (error) {
             console.error('Error:', error);
             alert("Failed to connect to the server.");
             saveRegisterBtn.disabled = false;
-            saveRegisterBtn.innerHTML = 'Save & Register';
+            saveRegisterBtn.innerHTML = 'Login & Complete';
         }
     });
 
-    // Back to Form Click
-    backToFormBtn.addEventListener('click', () => {
-        stopCamera();
-        cameraCard.classList.add('hidden');
-        formCard.classList.remove('hidden');
-    });
-
-    // Close Modal and Proceed to Dashboard
+    // Close Modal and Proceed to Scan
     closeModal.addEventListener('click', () => {
-        window.location.href = '/dashboard';
+        window.location.href = '/scan'; // Changed from /dashboard to /scan
     });
 });
